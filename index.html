@@ -122,7 +122,7 @@ function defaultState(){
   // Seeded: started Mon 2026-06-29, completed through Week 2 Day 4
   for(let d=1;d<=7;d++) status["1."+d]="done";
   for(let d=1;d<=4;d++) status["2."+d]="done";
-  return {start:"2026-06-29", key:"", units:"lb", maxes:{}, status, notes:{}, deloads:[], hevy:{byDate:{},last:null}, order:{}, shifts:[], rolling:false, health:{byDate:{},last:null}};
+  return {start:"2026-06-29", key:"", units:"lb", maxes:{}, status, notes:{}, deloads:[], hevy:{byDate:{},last:null}, order:{}, shifts:[], rolling:false, health:{byDate:{},last:null}, maxLog:[], wizards:{}, autoComplete:true};
 }
 function load(){ try{const raw=localStorage.getItem(LSKEY); state=raw?Object.assign(defaultState(),JSON.parse(raw)):defaultState();}catch(e){state=defaultState();} }
 function save(){ localStorage.setItem(LSKEY,JSON.stringify(state)); }
@@ -389,8 +389,14 @@ async function hevySync(btn){
         if(st<cutoff){older=true;continue;}
         const en=w.end_time?new Date(w.end_time):null;
         let vol=0,sets=0;
-        (w.exercises||[]).forEach(e=>(e.sets||[]).forEach(s=>{sets++;vol+=(s.weight_kg||0)*(s.reps||0);}));
-        const rec={id:w.id,title:w.title||"Workout",start:w.start_time,mins:en?Math.round((en-st)/60000):null,vol:Math.round(vol*2.20462),sets,ex:(w.exercises||[]).length};
+        const exd=[];
+        (w.exercises||[]).forEach(e=>{
+          let best=null;
+          (e.sets||[]).forEach(s=>{sets++;vol+=(s.weight_kg||0)*(s.reps||0);
+            if(s.weight_kg&&s.reps){const e1=s.weight_kg*(1+s.reps/30);if(!best||e1>best.e1)best={wkg:s.weight_kg,reps:s.reps,e1};}});
+          exd.push({t:e.title,wkg:best?best.wkg:null,reps:best?best.reps:null});
+        });
+        const rec={id:w.id,title:w.title||"Workout",start:w.start_time,mins:en?Math.round((en-st)/60000):null,vol:Math.round(vol*2.20462),sets,ex:(w.exercises||[]).length,exd};
         const k=iso(st);
         byDate[k]=byDate[k]||[];
         const idx=byDate[k].findIndex(x=>x.id===rec.id);
@@ -401,6 +407,7 @@ async function hevySync(btn){
       page++;
     }
     state.hevy={byDate,last:new Date().toISOString()};
+    applyAutoComplete();
     save();render();
     alert("Synced "+fetched+" workouts from Hevy.");
   }catch(e){
@@ -410,6 +417,122 @@ async function hevySync(btn){
 }
 function hevyFor(w,d){ return state.hevy.byDate[iso(dateOfDay(w,d))]||[]; }
 function healthFor(w,d){ return (state.health&&state.health.byDate[iso(dateOfDay(w,d))])||[]; }
+/* ================= COMPLIANCE + NUMBERS ENGINE ================= */
+function mapLift(title){
+  const t=(title||"").toLowerCase();
+  if(t.includes("power clean"))return "pc";
+  if(t.includes("push press"))return "pp";
+  if(t.includes("rack pull"))return "rack";
+  if(t.includes("overhead press")||t.includes("shoulder press")||t.includes("military press"))return "ohp";
+  if(t.includes("bench press"))return "bench";
+  if(t.includes("deadlift")&&!t.includes("romanian")&&!t.includes("stiff")&&!t.includes("single"))return "dead";
+  if(t.includes("squat")&&!/goblet|jump|split|bulgarian|pistol|front|hack|sissy/.test(t))return "squat";
+  if(t.includes("row")&&/barbell|pendlay|bent over/.test(t))return "row";
+  return null;
+}
+function actualFor(w,d,liftKey){
+  for(const wo of hevyFor(w,d))for(const e of (wo.exd||[])){
+    if(mapLift(e.t)===liftKey&&e.wkg)return {lb:Math.round(e.wkg*2.20462),reps:e.reps};
+  }
+  return null;
+}
+function hevySuggestions(){
+  const best={};
+  for(const arr of Object.values(state.hevy.byDate))for(const wo of arr)for(const e of (wo.exd||[])){
+    const lk=mapLift(e.t);if(!lk||!e.wkg||!e.reps)continue;
+    const e1=Math.round(e.wkg*2.20462*(1+Math.min(e.reps,12)/30)/2.5)*2.5;
+    if(!best[lk]||e1>best[lk])best[lk]=e1;
+  }
+  return best;
+}
+function lssTarget(wk){
+  if(wk.phase==="Base"&&wk.phaseWeek<=4)return [95,125,155,180][wk.phaseWeek-1];
+  if(wk.phase==="Armor")return 120;
+  if(wk.phase==="Operator"){
+    const bw=wk.phaseWeek;
+    if(bw===13)return null;
+    if(bw===6||bw===12)return 90;
+    if(bw>6)return 150;
+    return (bw%2===1)?120:150;
+  }
+  return null;
+}
+function lssDone(w){
+  let m=0;
+  for(let d=1;d<=7;d++)healthFor(w,d).forEach(x=>{if(x.mins)m+=x.mins;});
+  return Math.round(m);
+}
+function applyAutoComplete(){
+  if(!state.autoComplete)return;
+  const t=new Date();t.setHours(0,0,0,0);
+  for(const x of sessionsChrono()){
+    if(x.s.tag==="rest")continue;
+    const k=x.w+"."+x.d;
+    if(state.status[k])continue;
+    if(dateOfDay(x.w,x.d)>t)continue;
+    if(hevyFor(x.w,x.d).length||healthFor(x.w,x.d).length)state.status[k]="done";
+  }
+}
+function pushMaxLog(lift,val,src){
+  state.maxLog.push({date:iso(new Date()),lift,val,src});
+  if(state.maxLog.length>100)state.maxLog=state.maxLog.slice(-100);
+}
+const WIZARDS=[
+  {id:"baseTest",week:5,title:"Base Test Week — enter your 1RMs",type:"test",lifts:["bench","row","squat","dead","rack","ohp"],note:"Warm up, pyramid to a solid 2-3RM, use the calculator to estimate your 1RM. These numbers drive every Armor session."},
+  {id:"armorProg",week:12,title:"Armor → Operator: add 5-10 lb",type:"prog",note:"Book rule: before Block 3, add 5-10 lb to Bench, Squat and Deadlift 1RMs.",apply:{bench:5,squat:10,dead:10}},
+  {id:"blackProg",week:18,title:"Blue → Black: Forced Progression",type:"prog",note:"Add 2.5-5 lb to upper-body 1RMs and 5-10 lb to lower-body 1RMs. If you couldn't complete all reps last block, skip and keep current numbers.",apply:{bench:5,row:5,ohp:5,squat:10,dead:10,rack:10}},
+  {id:"opTest",week:24,title:"Operator Test Week — enter your 1RMs",type:"test",lifts:["pc","pp","row"],note:"Test Power Clean, Push Press and Pendlay Row for Vertex/Breacher. Squat, Bench carry over from last block."}
+];
+function pendingWizard(cw){
+  return WIZARDS.find(wz=>cw>=wz.week&&!state.wizards[wz.id]);
+}
+function openWizard(id){
+  const wz=WIZARDS.find(x=>x.id===id);
+  const NAME=Object.fromEntries(MAXKEYS);
+  let html='<div class="grab"></div><button class="closex" onclick="closeModal()">✕</button><h3>'+esc(wz.title)+'</h3><div class="note">'+esc(wz.note)+"</div>";
+  if(wz.type==="test"){
+    html+='<div class="maxgrid" style="margin-top:12px">';
+    for(const k of wz.lifts)html+='<div class="mx"><label>'+esc(NAME[k])+'</label><input type="number" inputmode="decimal" id="wz_'+k+'" value="'+(state.maxes[k]||"")+'" placeholder="lb"></div>';
+    html+="</div>";
+    html+='<label style="margin-top:16px">1RM calculator (weight × reps → est. 1RM)</label><div class="maxgrid"><div class="mx"><input type="number" inputmode="decimal" id="c_w" placeholder="weight lb"></div><div class="mx"><input type="number" inputmode="numeric" id="c_r" placeholder="reps"></div></div>';
+    html+='<div class="btnrow"><button class="b-sec" style="flex:1" onclick="calc1rm()">Calculate</button></div><div class="note" id="c_out"></div>';
+    html+='<div class="btnrow"><button class="b-pri" onclick="saveWizardTest(\''+id+'\')">Save 1RMs</button></div>';
+  }else{
+    html+='<div style="margin-top:10px">';
+    for(const [k,inc] of Object.entries(wz.apply)){
+      if(!state.maxes[k])continue;
+      html+='<div class="line"><span class="nm">'+esc(NAME[k])+'</span><span class="sc">'+state.maxes[k]+' lb</span><span class="wt">→ '+(state.maxes[k]+inc)+" lb</span></div>";
+    }
+    html+="</div>";
+    html+='<div class="btnrow"><button class="b-pri" onclick="applyWizardProg(\''+id+'\')">Apply progression</button><button class="b-sec" onclick="skipWizard(\''+id+'\')">Keep current</button></div>';
+  }
+  document.getElementById("sheet").innerHTML=html;
+  document.getElementById("modal").classList.add("open");
+}
+function calc1rm(){
+  const w=parseFloat(document.getElementById("c_w").value),r=parseInt(document.getElementById("c_r").value);
+  const out=document.getElementById("c_out");
+  if(!(w>0&&r>0)){out.textContent="Enter weight and reps.";return;}
+  const e1=Math.round(w*(1+Math.min(r,12)/30)/2.5)*2.5;
+  out.textContent="Estimated 1RM: "+e1+" lb (Epley). Type it into the lift field above.";
+}
+function saveWizardTest(id){
+  const wz=WIZARDS.find(x=>x.id===id);
+  for(const k of wz.lifts){
+    const v=parseFloat(document.getElementById("wz_"+k).value);
+    if(v>0&&v!==state.maxes[k]){state.maxes[k]=v;pushMaxLog(k,v,"test");}
+  }
+  state.wizards[id]=1;save();closeModal();render();
+}
+function applyWizardProg(id){
+  const wz=WIZARDS.find(x=>x.id===id);
+  for(const [k,inc] of Object.entries(wz.apply)){
+    if(state.maxes[k]){state.maxes[k]+=inc;pushMaxLog(k,state.maxes[k],"forced prog");}
+  }
+  state.wizards[id]=1;save();closeModal();render();
+}
+function skipWizard(id){state.wizards[id]=1;save();closeModal();render();}
+function applySuggestion(k,v){state.maxes[k]=v;pushMaxLog(k,v,"hevy e1RM");save();render();}
 /* ================= APPLE HEALTH IMPORT ================= */
 function hnum(v){const n=parseFloat(v);return isNaN(n)?null:n;}
 function parseHealth(txt){
@@ -439,6 +562,7 @@ function parseHealth(txt){
   }
   if(!n&&!recs.length)throw new Error("no workouts recognized");
   state.health={byDate,last:new Date().toISOString()};
+  applyAutoComplete();
   save();render();
   return n;
 }
@@ -521,6 +645,13 @@ function renderToday(){
         '<button class="b-sec" onclick="openDetail('+wk.n+","+d+')">Details</button></div></div>';
     }
   }
+  // block wizard banner
+  const nxw=nextUp();
+  const cw=(tp.entry&&tp.entry.wk)?tp.entry.wk.n:(nxw?nxw.w:1);
+  const wz=pendingWizard(cw);
+  if(wz){
+    html+='<div class="banner" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span>'+esc(wz.title)+'</span><button class="b-sec" style="white-space:nowrap;padding:6px 12px;font-size:.8rem" onclick="openWizard(\''+wz.id+'\')">Open</button></div>';
+  }
   // up next
   const nx=nextUp();
   if(nx){
@@ -534,7 +665,9 @@ function renderToday(){
   }
   // this week
   if(tp.entry&&tp.entry.kind==="week"){
-    html+='<div class="card"><h2>This week</h2>'+weekRow(tp.entry.wk,true)+weekNotes(tp.entry.wk)+"</div>";
+    const tgt=lssTarget(tp.entry.wk);
+    const lssLine=tgt?'<div class="small" style="margin-top:8px">LSS this week: <b style="color:'+(lssDone(tp.entry.wk.n)>=tgt?"var(--done)":"var(--txt)")+'">'+lssDone(tp.entry.wk.n)+"</b> / "+tgt+" min target (from Apple Health imports)</div>":"";
+    html+='<div class="card"><h2>This week</h2>'+weekRow(tp.entry.wk,true)+weekNotes(tp.entry.wk)+lssLine+"</div>";
     const hv=[];
     for(let d=1;d<=7;d++) hevyFor(tp.entry.wk.n,d).forEach(x=>hv.push(x));
     if(hv.length){
@@ -619,10 +752,34 @@ function renderSettings(){
   for(const [k,name] of MAXKEYS){
     html+='<div class="mx"><label>'+name+'</label><input type="number" inputmode="decimal" placeholder="lb" value="'+(state.maxes[k]||"")+'" onchange="setMax(\''+k+'\',this.value)"></div>';
   }
-  html+="</div></div>";
+  html+="</div>";
+  // Hevy e1RM suggestions
+  const sug=hevySuggestions();
+  const NAME=Object.fromEntries(MAXKEYS);
+  const sugRows=Object.entries(sug).filter(([k,v])=>v>=(state.maxes[k]||0)+2.5);
+  if(sugRows.length){
+    html+='<label>Suggested from Hevy history (best estimated 1RM)</label>';
+    sugRows.forEach(([k,v])=>{
+      html+='<div class="hevy-item"><div>'+NAME[k]+'<div class="t">current '+(state.maxes[k]||"—")+' lb</div></div><button class="b-sec" style="padding:6px 12px;font-size:.8rem" onclick="applySuggestion(\''+k+'\','+v+')">Set '+v+' lb</button></div>';
+    });
+  }
+  // max history
+  if(state.maxLog.length){
+    html+='<label>1RM history</label>';
+    state.maxLog.slice(-8).reverse().forEach(e=>{
+      html+='<div class="hevy-item"><div>'+NAME[e.lift]+' → '+e.val+' lb<div class="t">'+e.date+' · '+esc(e.src)+"</div></div></div>";
+    });
+  }
+  // wizard access
+  html+='<label>Block wizards</label>';
+  WIZARDS.forEach(wz=>{
+    html+='<div class="hevy-item"><div>'+esc(wz.title)+'<div class="t">Week '+wz.week+(state.wizards[wz.id]?" · done":"")+'</div></div><button class="b-ghost" style="padding:6px 12px;font-size:.8rem" onclick="openWizard(\''+wz.id+'\')">Open</button></div>';
+  });
+  html+="</div>";
   html+='<div class="card"><h2>Hevy Sync</h2><label>API key (hevy.com → Settings → API)</label><input type="password" value="'+esc(state.key)+'" onchange="state.key=this.value;save()" placeholder="paste key — stays on this device">';
   html+='<div class="btnrow"><button class="b-sec" style="flex:1" onclick="hevySync(this)">Sync Hevy</button></div>';
-  html+='<div class="small" style="margin-top:8px">'+(state.hevy.last?"Last synced "+new Date(state.hevy.last).toLocaleString():"Never synced")+". Workouts are matched to plan days by date and shown as pink dots.</div></div>";
+  html+='<label style="display:flex;align-items:center;gap:10px;text-transform:none;font-size:.9rem;color:var(--txt)"><input type="checkbox" style="width:auto" '+(state.autoComplete?"checked":"")+' onchange="state.autoComplete=this.checked;save()"> Auto-complete past sessions when a synced workout matches that day</label>';
+  html+='<div class="small" style="margin-top:8px">'+(state.hevy.last?"Last synced "+new Date(state.hevy.last).toLocaleString():"Never synced")+". Workouts are matched to plan days by date and shown as pink dots. Lift sessions also compare prescribed vs actual weights in the day detail.</div></div>";
   html+='<div class="card"><h2>Apple Health</h2><div class="small" style="margin-bottom:10px">Import watch/Health workouts (runs, hikes, HIC) and overlay them on the plan as teal dots. '+(state.health.last?"Last import "+new Date(state.health.last).toLocaleString()+".":"Never imported.")+'</div>';
   html+='<div class="btnrow" style="margin-top:0"><button class="b-sec" style="flex:1" onclick="importHealthClipboard()">Paste from clipboard</button></div>';
   html+='<label>Or paste manually</label><textarea id="hpaste" placeholder="Paste Shortcut output here…"></textarea><div class="btnrow"><button class="b-sec" style="flex:1" onclick="importHealthManual()">Import pasted text</button></div>';
@@ -658,6 +815,15 @@ function openDetail(w,d){
     html+='<h2 style="font-size:.8rem;text-transform:uppercase;color:var(--dim);margin-top:14px">Hevy — this day</h2>';
     html+=hv.map(x=>'<div class="hevy-item"><div>'+esc(x.title)+'</div><div style="text-align:right">'+(x.mins?x.mins+" min":"")+'<div class="t">'+x.ex+" exercises · "+x.vol.toLocaleString()+" lb</div></div></div>").join("");
   }
+  // compliance: prescribed vs actual (from Hevy per-exercise data)
+  const comp=s.lines.filter(l=>l.pct).map(l=>{
+    const a=actualFor(w,d,l.pct.lift);
+    if(!a)return null;
+    const presc=weightFor(l.pct);
+    const ok=!presc||a.lb>=presc-2.5;
+    return '<div class="line"><span class="nm">'+esc(l.nm.split(" @")[0])+'</span><span class="sc">did '+a.lb+" lb × "+a.reps+'</span><span class="wt" style="color:'+(ok?"var(--done)":"var(--hic)")+'">'+(presc?(ok?"✓ vs "+presc:presc-a.lb+" lb short"):"")+"</span></div>";
+  }).filter(Boolean).join("");
+  if(comp)html+='<h2 style="font-size:.8rem;text-transform:uppercase;color:var(--dim);margin-top:14px">Prescribed vs actual (Hevy)</h2>'+comp;
   const hl=healthFor(w,d);
   if(hl.length){
     html+='<h2 style="font-size:.8rem;text-transform:uppercase;color:var(--dim);margin-top:14px">Apple Health — this day</h2>';
