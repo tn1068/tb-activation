@@ -61,7 +61,12 @@ button{font:inherit;border:none;border-radius:10px;padding:10px 14px;font-weight
 .day.skip{opacity:.4}
 .day.skip::after{content:"–";position:absolute;top:1px;right:5px;color:var(--skip)}
 .day.today-ring{box-shadow:0 0 0 2px var(--accent)}
-.day .hv{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#ff5c8a}
+.day .hv{position:absolute;bottom:3px;left:38%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#ff5c8a}
+.day .hh{position:absolute;bottom:3px;left:62%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#2dd4bf}
+details.inst{margin-top:10px;font-size:.82rem;color:var(--dim)}
+details.inst summary{cursor:pointer;color:var(--accent);font-weight:600}
+details.inst ol{margin:8px 0 4px 18px;line-height:1.6}
+textarea{font:inherit;background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px;width:100%;min-height:70px}
 .phase-label{display:flex;align-items:center;gap:8px;margin:20px 0 10px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim)}
 .phase-label::after{content:"";flex:1;height:1px;background:var(--line)}
 .prog-wrap{background:var(--card2);border-radius:99px;height:8px;overflow:hidden;margin:6px 0 4px}
@@ -116,7 +121,7 @@ function defaultState(){
   // Seeded: started Mon 2026-06-29, completed through Week 2 Day 4
   for(let d=1;d<=7;d++) status["1."+d]="done";
   for(let d=1;d<=4;d++) status["2."+d]="done";
-  return {start:"2026-06-29", key:"", units:"lb", maxes:{}, status, notes:{}, deloads:[], hevy:{byDate:{},last:null}};
+  return {start:"2026-06-29", key:"", units:"lb", maxes:{}, status, notes:{}, deloads:[], hevy:{byDate:{},last:null}, order:{}, shifts:[], rolling:false, health:{byDate:{},last:null}};
 }
 function load(){ try{const raw=localStorage.getItem(LSKEY); state=raw?Object.assign(defaultState(),JSON.parse(raw)):defaultState();}catch(e){state=defaultState();} }
 function save(){ localStorage.setItem(LSKEY,JSON.stringify(state)); }
@@ -320,29 +325,34 @@ const iso=(d)=>{const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+
 function startDate(){const [y,m,d]=state.start.split("-").map(Number);return new Date(y,m-1,d);}
 function deloadsBefore(w){return state.deloads.filter(x=>x<w).length;}
 function calIndexOfWeek(w){return (w-1)+deloadsBefore(w);}
-function dateOfDay(w,d){const t=new Date(startDate());t.setDate(t.getDate()+calIndexOfWeek(w)*7+(d-1));return t;}
+function orderOf(w){return state.order[w]||[1,2,3,4,5,6,7];}
+function slotOf(w,origD){return orderOf(w).indexOf(origD)+1;}
+function absOf(w,slot){return calIndexOfWeek(w)*7+(slot-1);}
+function shiftFor(abs){let s=0;for(const sh of (state.shifts||[]))if(sh.fromAbs<=abs)s+=sh.days;return s;}
+function dateOfSlot(w,slot){const t=new Date(startDate());t.setDate(t.getDate()+absOf(w,slot)+shiftFor(absOf(w,slot)));return t;}
+function dateOfDay(w,origD){return dateOfSlot(w,slotOf(w,origD));}
 function totalCalWeeks(){return PLAN.length+state.deloads.length;}
 function todayPos(){
   const t=new Date();t.setHours(0,0,0,0);
-  const ds=Math.floor((t-startDate())/DAYMS);
-  if(ds<0)return {before:true};
-  const cw=Math.floor(ds/7), dn=ds%7+1;
-  // map calendar week -> program week or deload
-  let ci=0;
+  if(t<dateOfSlot(1,1))return {before:true};
   for(const wk of PLAN){
-    const dl=state.deloads.includes(wk.n-1)?1:0; // deload inserted after week n-1 sits before this week
-    // build sequence instead:
-    void dl;
+    for(let slot=1;slot<=7;slot++){
+      if(dateOfSlot(wk.n,slot).getTime()===t.getTime()){
+        return {entry:{kind:"week",wk},day:orderOf(wk.n)[slot-1],slot};
+      }
+    }
   }
-  // simpler: walk sequence
-  let seq=[];
-  for(const wk of PLAN){ seq.push({kind:"week",wk}); if(state.deloads.includes(wk.n)) seq.push({kind:"deload",after:wk.n}); }
-  if(cw>=seq.length) return {after:true};
-  return {entry:seq[cw],day:dn,calWeek:cw};
+  if(t>dateOfSlot(PLAN.length,7))return {after:true};
+  let after=null;
+  for(const wk of PLAN){ if(dateOfSlot(wk.n,7)<t) after=wk.n; }
+  return {gap:true, afterWeek:after};
 }
 function sessionsChrono(){
   const out=[];
-  for(const wk of PLAN) for(let d=1;d<=7;d++){ out.push({w:wk.n,d,wk,s:wk.days[d-1]}); }
+  for(const wk of PLAN){
+    const ord=orderOf(wk.n);
+    for(let slot=1;slot<=7;slot++){const d=ord[slot-1];out.push({w:wk.n,d,slot,wk,s:wk.days[d-1]});}
+  }
   return out;
 }
 function nextUp(){
@@ -398,6 +408,48 @@ async function hevySync(btn){
   if(btn){btn.disabled=false;btn.textContent="Sync Hevy";}
 }
 function hevyFor(w,d){ return state.hevy.byDate[iso(dateOfDay(w,d))]||[]; }
+function healthFor(w,d){ return (state.health&&state.health.byDate[iso(dateOfDay(w,d))])||[]; }
+/* ================= APPLE HEALTH IMPORT ================= */
+function hnum(v){const n=parseFloat(v);return isNaN(n)?null:n;}
+function parseHealth(txt){
+  txt=(txt||"").trim();
+  if(!txt)throw new Error("nothing to import");
+  let recs=[];
+  if(txt[0]==="["||txt[0]==="{"){
+    const j=JSON.parse(txt);
+    const arr=Array.isArray(j)?j:(j.workouts||j.data||[]);
+    for(const o of arr)recs.push({title:o.type||o.workoutActivityType||o.title||"Workout",start:o.start||o.startDate||o.date,mins:hnum(o.mins||o.duration),km:hnum(o.km||o.distance),kcal:hnum(o.kcal||o.energy||o.activeEnergy),hr:hnum(o.hr||o.avgHR||o.heartRate)});
+  }else{
+    for(const line of txt.split(/\n+/)){
+      const p=line.split("|").map(s=>s.trim());
+      if(p.length<2)continue;
+      recs.push({title:p[0]||"Workout",start:p[1],mins:hnum(p[2]),km:hnum(p[3]),kcal:hnum(p[4]),hr:hnum(p[5])});
+    }
+  }
+  const byDate={...state.health.byDate};
+  let n=0;
+  for(const r of recs){
+    const dt=new Date(r.start);
+    if(isNaN(dt))continue;
+    if(r.mins&&r.mins>300)r.mins=Math.round(r.mins/60); // seconds -> minutes
+    const k=iso(dt);
+    byDate[k]=byDate[k]||[];
+    if(!byDate[k].some(x=>x.start===r.start&&x.title===r.title)){byDate[k].push(r);n++;}
+  }
+  if(!n&&!recs.length)throw new Error("no workouts recognized");
+  state.health={byDate,last:new Date().toISOString()};
+  save();render();
+  return n;
+}
+async function importHealthClipboard(){
+  try{const txt=await navigator.clipboard.readText();const n=parseHealth(txt);alert("Imported "+n+" new workout(s) from Health.");}
+  catch(e){alert("Clipboard import failed ("+e.message+"). Use the manual paste box instead.");}
+}
+function importHealthManual(){
+  const el=document.getElementById("hpaste");
+  try{const n=parseHealth(el.value);el.value="";alert("Imported "+n+" new workout(s).");}
+  catch(e){alert("Import failed: "+e.message);}
+}
 
 /* ================= RENDER ================= */
 let tab="today";
@@ -426,13 +478,16 @@ function dayShort(s){
 function statusOf(w,d){return state.status[w+"."+d]||null;}
 function weekRow(wk,highlight){
   const tp=todayPos();
-  let html='<div class="weekrow"><div class="weekhead"><b>Week '+wk.n+'</b><span>'+esc(wk.phase+(wk.label?" · "+wk.label:" · Wk "+wk.phaseWeek))+' · '+fmtD(dateOfDay(wk.n,1))+"</span></div><div class='days'>";
-  for(let d=1;d<=7;d++){
+  let html='<div class="weekrow"><div class="weekhead"><b>Week '+wk.n+'</b><span>'+esc(wk.phase+(wk.label?" · "+wk.label:" · Wk "+wk.phaseWeek))+' · '+fmtD(dateOfSlot(wk.n,1))+"</span></div><div class='days'>";
+  const ord=orderOf(wk.n);
+  for(let slot=1;slot<=7;slot++){
+    const d=ord[slot-1];
     const s=wk.days[d-1];
     const st=statusOf(wk.n,d);
     const isToday=tp.entry&&tp.entry.kind==="week"&&tp.entry.wk.n===wk.n&&tp.day===d;
     const hevy=hevyFor(wk.n,d).length?'<span class="hv"></span>':"";
-    html+='<div class="day t-'+s.tag+(st==="done"?" done":st==="skip"?" skip":"")+(isToday?" today-ring":"")+'" onclick="openDetail('+wk.n+","+d+')"><span class="dn">D'+d+"</span>"+esc(dayShort(s))+hevy+"</div>";
+    const hlth=healthFor(wk.n,d).length?'<span class="hh"></span>':"";
+    html+='<div class="day t-'+s.tag+(st==="done"?" done":st==="skip"?" skip":"")+(isToday?" today-ring":"")+'" onclick="openDetail('+wk.n+","+d+')"><span class="dn">D'+slot+"</span>"+esc(dayShort(s))+hevy+hlth+"</div>";
   }
   html+="</div>";
   if(state.deloads.includes(wk.n)){
@@ -446,6 +501,10 @@ function renderToday(){
   let html='<div class="hdr"><h1>Tactical Barbell · Activation</h1><small>started '+fmtD(startDate())+"</small></div>";
   if(tp.before){html+='<div class="card">Program starts '+fmtD(startDate())+".</div>";app.innerHTML=html;return;}
   if(tp.after){html+='<div class="card"><h2>Program complete</h2>Cyborgs only. 25 weeks in the books — you earned it. 🏁</div>';}
+  if(tp.gap){
+    const isDeload=tp.afterWeek&&state.deloads.includes(tp.afterWeek);
+    html+='<div class="card"><h2>Today</h2><div class="next-title">'+(isDeload?"Deload Week":"Off day")+'</div><div class="next-sub">'+(isDeload?"Inserted after Week "+tp.afterWeek:"Schedule shifted — nothing on the calendar today")+'</div>'+(isDeload?'<div class="def">'+esc(DEFS.deload)+"</div>":"")+"</div>";
+  }
   // today card
   if(tp.entry){
     if(tp.entry.kind==="deload"){
@@ -466,7 +525,7 @@ function renderToday(){
   if(nx){
     const dt=dateOfDay(nx.w,nx.d);
     const today=new Date();today.setHours(0,0,0,0);
-    const overdue=dt<today;
+    const overdue=!state.rolling&&dt<today;
     html+='<div class="card"><h2>Up next</h2>'+pill(nx.s.tag)+
       '<div class="next-title">'+esc(nx.s.title)+'</div><div class="next-sub">Week '+nx.w+" · Day "+nx.d+" · "+fmtD(dt)+(overdue?' · <span class="overdue">behind schedule</span>':"")+"</div>"+
       linesHtml(nx.s)+
@@ -479,6 +538,11 @@ function renderToday(){
     for(let d=1;d<=7;d++) hevyFor(tp.entry.wk.n,d).forEach(x=>hv.push(x));
     if(hv.length){
       html+='<div class="card"><h2>Hevy — this week</h2>'+hv.map(x=>'<div class="hevy-item"><div>'+esc(x.title)+'<div class="t">'+fmtD(new Date(x.start))+"</div></div><div style='text-align:right'>"+(x.mins?x.mins+" min":"")+'<div class="t">'+x.ex+" exercises · "+x.vol.toLocaleString()+" lb</div></div></div>").join("")+"</div>";
+    }
+    const hl=[];
+    for(let d=1;d<=7;d++) healthFor(tp.entry.wk.n,d).forEach(x=>hl.push(x));
+    if(hl.length){
+      html+='<div class="card"><h2>Apple Health — this week</h2>'+hl.map(x=>'<div class="hevy-item"><div>'+esc(x.title)+'<div class="t">'+fmtD(new Date(x.start))+"</div></div><div style='text-align:right'>"+(x.mins?Math.round(x.mins)+" min":"")+'<div class="t">'+[(x.km?x.km.toFixed(1)+" km":""),(x.hr?Math.round(x.hr)+" bpm":"")].filter(Boolean).join(" · ")+"</div></div></div>").join("")+"</div>";
     }
   }
   app.innerHTML=html;
@@ -530,7 +594,7 @@ function renderStats(){
     html+='<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:.85rem"><span>'+ph+'</span><span style="color:var(--dim)">'+v.done+"/"+v.total+'</span></div><div class="prog-wrap"><div class="prog-bar" style="width:'+p+'%"></div></div></div>';
   }
   html+="</div>";
-  html+='<div class="statgrid"><div class="stat"><div class="v">'+adher+'%</div><div class="l">Adherence to date</div></div><div class="stat"><div class="v">'+hevyTotal+'</div><div class="l">Hevy workouts synced</div></div></div>';
+  html+='<div class="statgrid"><div class="stat"><div class="v">'+(state.rolling?"—":adher+"%")+'</div><div class="l">'+(state.rolling?"Rolling mode":"Adherence to date")+'</div></div><div class="stat"><div class="v">'+hevyTotal+'</div><div class="l">Hevy workouts synced</div></div></div>';
   const nx=nextUp();
   if(nx){
     const end=dateOfDay(PLAN.length,7);
@@ -541,6 +605,14 @@ function renderStats(){
 function renderSettings(){
   let html='<div class="hdr"><h1>Setup</h1><small></small></div>';
   html+='<div class="card"><h2>Program</h2><label>Start date (Week 1, Day 1 — a Monday)</label><input type="date" value="'+state.start+'" onchange="state.start=this.value;save();render()">';
+  html+='<label style="display:flex;align-items:center;gap:10px;text-transform:none;font-size:.9rem;color:var(--txt)"><input type="checkbox" style="width:auto" '+(state.rolling?"checked":"")+' onchange="state.rolling=this.checked;save();render()"> Rolling mode — sequence over calendar, no "behind schedule" nagging</label>';
+  if(state.shifts.length){
+    html+='<label>Active schedule pushes</label>';
+    state.shifts.forEach((sh,i)=>{
+      const from=new Date(startDate());from.setDate(from.getDate()+sh.fromAbs);
+      html+='<div class="hevy-item"><div>+'+sh.days+' day'+(sh.days>1?"s":"")+'<div class="t">from '+fmtD(from)+'</div></div><button class="b-ghost" style="padding:4px 10px;font-size:.75rem" onclick="removeShift('+i+')">undo</button></div>';
+    });
+  }
   html+='<label>Units note</label><div class="small">Weights shown in lb, rounded to 5. Hevy volume converted from kg.</div></div>';
   html+='<div class="card"><h2>1RM Maxes</h2><div class="small" style="margin-bottom:10px">Enter after Base Week 5 testing. Percentages auto-calculate on every lift session. Forced progression: +2.5-5 lb upper / +5-10 lb lower between blocks.</div><div class="maxgrid">';
   for(const [k,name] of MAXKEYS){
@@ -550,6 +622,19 @@ function renderSettings(){
   html+='<div class="card"><h2>Hevy Sync</h2><label>API key (hevy.com → Settings → API)</label><input type="password" value="'+esc(state.key)+'" onchange="state.key=this.value;save()" placeholder="paste key — stays on this device">';
   html+='<div class="btnrow"><button class="b-sec" style="flex:1" onclick="hevySync(this)">Sync Hevy</button></div>';
   html+='<div class="small" style="margin-top:8px">'+(state.hevy.last?"Last synced "+new Date(state.hevy.last).toLocaleString():"Never synced")+". Workouts are matched to plan days by date and shown as pink dots.</div></div>";
+  html+='<div class="card"><h2>Apple Health</h2><div class="small" style="margin-bottom:10px">Import watch/Health workouts (runs, hikes, HIC) and overlay them on the plan as teal dots. '+(state.health.last?"Last import "+new Date(state.health.last).toLocaleString()+".":"Never imported.")+'</div>';
+  html+='<div class="btnrow" style="margin-top:0"><button class="b-sec" style="flex:1" onclick="importHealthClipboard()">Paste from clipboard</button></div>';
+  html+='<label>Or paste manually</label><textarea id="hpaste" placeholder="Paste Shortcut output here…"></textarea><div class="btnrow"><button class="b-sec" style="flex:1" onclick="importHealthManual()">Import pasted text</button></div>';
+  html+='<details class="inst"><summary>One-time setup: build the “Export Workouts” Shortcut</summary><ol>'+
+    '<li>Open the <b>Shortcuts</b> app → <b>+</b> to create a new shortcut. Name it “Export Workouts”.</li>'+
+    '<li>Add action <b>Find Workouts</b> (search “workouts”). Add filter: <b>Start Date</b> is in the <b>last 14 days</b>.</li>'+
+    '<li>Add action <b>Repeat with Each</b> (it wraps the workouts automatically).</li>'+
+    '<li>Inside the repeat, add a <b>Text</b> action containing exactly, on one line — <i>Repeat Item</i> variables: <b>Activity Type</b> | <b>Start Date</b> | <b>Duration</b> | <b>Distance</b> | <b>Active Energy</b><br>(tap each blue token → for Start Date choose Format: <b>ISO 8601</b>; for Duration choose <b>minutes</b> if offered)</li>'+
+    '<li>Still inside the repeat, add <b>Add to Variable</b> → name it “out”.</li>'+
+    '<li>After the repeat, add <b>Combine Text</b> → combine “out” with <b>New Lines</b>.</li>'+
+    '<li>Add <b>Copy to Clipboard</b>. Done.</li>'+
+    '<li>After workouts: run the Shortcut, open this app, tap <b>Paste from clipboard</b>.</li>'+
+    '</ol><div class="small">Tip: add the Shortcut to your home screen or an Automation ("when Workout ends → run Export Workouts") to make it one tap.</div></details></div>';
   html+='<div class="card"><h2>Backup</h2><div class="btnrow"><button class="b-sec" style="flex:1" onclick="exportJson()">Export JSON</button><button class="b-sec" style="flex:1" onclick="document.getElementById(\'imp\').click()">Import</button></div><input type="file" id="imp" accept=".json" style="display:none" onchange="importJson(this)">';
   html+='<div class="btnrow"><button class="b-danger" style="flex:1" onclick="if(confirm(\'Erase ALL data?\')){localStorage.removeItem(LSKEY);location.reload()}">Reset everything</button></div></div>';
   html+='<div class="small" style="margin:4px 6px">Add to Home Screen: open in Safari → Share → “Add to Home Screen” for the full-screen app experience. Data lives in this browser — export a backup occasionally.</div>';
@@ -572,6 +657,11 @@ function openDetail(w,d){
     html+='<h2 style="font-size:.8rem;text-transform:uppercase;color:var(--dim);margin-top:14px">Hevy — this day</h2>';
     html+=hv.map(x=>'<div class="hevy-item"><div>'+esc(x.title)+'</div><div style="text-align:right">'+(x.mins?x.mins+" min":"")+'<div class="t">'+x.ex+" exercises · "+x.vol.toLocaleString()+" lb</div></div></div>").join("");
   }
+  const hl=healthFor(w,d);
+  if(hl.length){
+    html+='<h2 style="font-size:.8rem;text-transform:uppercase;color:var(--dim);margin-top:14px">Apple Health — this day</h2>';
+    html+=hl.map(x=>'<div class="hevy-item"><div>'+esc(x.title)+'</div><div style="text-align:right">'+(x.mins?Math.round(x.mins)+" min":"")+'<div class="t">'+[(x.km?x.km.toFixed(1)+" km":""),(x.hr?Math.round(x.hr)+" bpm":"")].filter(Boolean).join(" · ")+"</div></div></div>").join("");
+  }
   if(s.tag!=="rest"){
     html+='<div class="btnrow">'+
       '<button class="b-pri" onclick="setStatus('+w+","+d+",'done');closeModal()\">"+(st==="done"?"✓ Done":"Mark Done")+"</button>"+
@@ -579,6 +669,21 @@ function openDetail(w,d){
       (st?'<button class="b-ghost" onclick="setStatus('+w+","+d+",null);closeModal()\">Clear</button>":"")+
       "</div>";
   }
+  // reschedule controls
+  const curSlot=slotOf(w,d);
+  const ord=orderOf(w);
+  let opts='<option value="">— pick a day —</option>';
+  for(let slot=1;slot<=7;slot++){
+    if(slot===curSlot)continue;
+    const other=wk.days[ord[slot-1]-1];
+    opts+='<option value="'+slot+'">Day '+slot+" · "+fmtD(dateOfSlot(w,slot))+" — "+esc(dayShort(other))+"</option>";
+  }
+  html+='<label style="margin-top:16px">Move this session (swaps with target day)</label><select onchange="moveSession('+w+","+d+',this.value)">'+opts+"</select>";
+  const abs=absOf(w,curSlot);
+  html+='<label>Push whole schedule back, starting from this day</label><div class="btnrow" style="margin-top:0">'+
+    '<button class="b-sec" style="flex:1" onclick="pushSchedule('+abs+',1)">+1 day</button>'+
+    '<button class="b-sec" style="flex:1" onclick="pushSchedule('+abs+',2)">+2 days</button>'+
+    '<button class="b-sec" style="flex:1" onclick="pushSchedule('+abs+',7)">+1 week</button></div>';
   html+='<div class="btnrow"><button class="b-ghost" style="flex:1" onclick="toggleDeload('+w+');closeModal()">'+(state.deloads.includes(w)?"Remove deload after Week "+w:"Insert deload week after Week "+w)+"</button></div>";
   document.getElementById("sheet").innerHTML=html;
   document.getElementById("modal").classList.add("open");
@@ -598,6 +703,20 @@ function setMax(k,v){
   if(n>0)state.maxes[k]=n;else delete state.maxes[k];
   save();
 }
+function moveSession(w,origD,slotStr){
+  const ts=parseInt(slotStr);
+  if(!ts)return;
+  const ord=orderOf(w).slice();
+  const cs=ord.indexOf(origD);
+  const tmp=ord[ts-1];ord[ts-1]=origD;ord[cs]=tmp;
+  state.order[w]=ord;
+  save();closeModal();render();
+}
+function pushSchedule(abs,days){
+  state.shifts.push({fromAbs:abs,days});
+  save();closeModal();render();
+}
+function removeShift(i){state.shifts.splice(i,1);save();render();}
 function toggleDeload(w){
   const i=state.deloads.indexOf(w);
   if(i>=0)state.deloads.splice(i,1);else{state.deloads.push(w);state.deloads.sort((a,b)=>a-b);}
