@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Activation">
+<meta name="theme-color" content="#0d1117">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADKklEQVR42u3dvXHbQBCAURGDVIEiuQDNuA5349CluBjnrsMzKsBlOHDisfiDWxyAvcX7QmogEcTz3pEWxcvzy+uTdK3JQyA4BIfgEByCQ3AIDsGh6s07/Iwv3397oLfo57dPm37/y0YvnwNRAEp/HFiUIdITBxbFiPTBgUVJIhMZVVt/XdZOjoX3YOt9tWu/xSMfx/HwzgGRB0rsWgRx3L83WCQkErgoERx37gQWmYm0Xp2eL5+TUel5bATHLZhk5PfR+vylbVm5+t2xGGuJWX69ppU/SVWfA3fYcxgbhfcf0xpuZAzqY+HwmI5SqfzzYxEOu41z7jymnTFqoOExdSGmksNj2o2hhhsefvtccKg7DhuOM287mieHDcd5th2WFcEhOASH4BAcgkNwCA7BITgkOASH4BAcgkNwCA7BITgEhwSH4BAcgkO7Nu/88/57/93C92DFjsrWcOc+H/XQ/HvjnROOHZWcxSjnblnR0Tjuv5v71ldjRw0xNoY4d5NDcAgOwSE4BIfgEByCQ3AIDgkOwSE4BIfgEByCQ3AIDp2vOcn9+PX+/vHGrz8iR2UrdhYPjzI5BIfgEByCQ3AIDgkOwSE4BIfgUKqy/Mfb57e3jzc+/Ps1V4/KVuwsMvzdIpNDcAgOwSE4BIfgEByCQ3AIDgkOwSE4BIfgEByCQ3AIDsGxUfc/JPfWV2NHZWvcczc5dLN5539ArZ/MHjsq5/AY7tznQx6mfY4aa31JeO6WFcEhOASH4BAcgkNwCA7BITgkOASH4BAcgkNwCA7BITgEhwSH4BAcgkO5cWT4BCHFar12D3DUeB+iYtfXsiI4tA8O244zbDgW4bDtOOeGI76sGB7lx8ZSHIbHCcfGqg2p4VF7bDTguAqNj0FlLFwKpqNUKvPMaMZh53Ge3cbfLs8vr10wojPEzGi6TFMvd9aXYjKe+r58zkeBfcaqZWXJPbDEJGQRuChBHEuEIpJnWsSuRRxH0xAD5ajlY80jvxaHrUaNZ61bbUhNhZIy+kwOI6Qei/44ECnDYisciBRgsS0OUAYFsTcODZrfPhccgkNwCA7BITgEh6r0B6QoEjHLNkH9AAAAAElFTkSuQmCC">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADKklEQVR42u3dvXHbQBCAURGDVIEiuQDNuA5349CluBjnrsMzKsBlOHDisfiDWxyAvcX7QmogEcTz3pEWxcvzy+uTdK3JQyA4BIfgEByCQ3AIDsGh6s07/Iwv3397oLfo57dPm37/y0YvnwNRAEp/HFiUIdITBxbFiPTBgUVJIhMZVVt/XdZOjoX3YOt9tWu/xSMfx/HwzgGRB0rsWgRx3L83WCQkErgoERx37gQWmYm0Xp2eL5+TUel5bATHLZhk5PfR+vylbVm5+t2xGGuJWX69ppU/SVWfA3fYcxgbhfcf0xpuZAzqY+HwmI5SqfzzYxEOu41z7jymnTFqoOExdSGmksNj2o2hhhsefvtccKg7DhuOM287mieHDcd5th2WFcEhOASH4BAcgkNwCA7BITgkOASH4BAcgkNwCA7BITgEhwSH4BAcgkO7Nu/88/57/93C92DFjsrWcOc+H/XQ/HvjnROOHZWcxSjnblnR0Tjuv5v71ldjRw0xNoY4d5NDcAgOwSE4BIfgEByCQ3AIDgkOwSE4BIfgEByCQ3AIDp2vOcn9+PX+/vHGrz8iR2UrdhYPjzI5BIfgEByCQ3AIDgkOwSE4BIfgUKqy/Mfb57e3jzc+/Ps1V4/KVuwsMvzdIpNDcAgOwSE4BIfgEByCQ3AIDgkOwSE4BIfgEByCQ3AIDsGxUfc/JPfWV2NHZWvcczc5dLN5539ArZ/MHjsq5/AY7tznQx6mfY4aa31JeO6WFcEhOASH4BAcgkNwCA7BITgkOASH4BAcgkNwCA7BITgEhwSH4BAcgkO5cWT4BCHFar12D3DUeB+iYtfXsiI4tA8O244zbDgW4bDtOOeGI76sGB7lx8ZSHIbHCcfGqg2p4VF7bDTguAqNj0FlLFwKpqNUKvPMaMZh53Ge3cbfLs8vr10wojPEzGi6TFMvd9aXYjKe+r58zkeBfcaqZWXJPbDEJGQRuChBHEuEIpJnWsSuRRxH0xAD5ajlY80jvxaHrUaNZ61bbUhNhZIy+kwOI6Qei/44ECnDYisciBRgsS0OUAYFsTcODZrfPhccgkNwCA7BITgEh6r0B6QoEjHLNkH9AAAAAElFTkSuQmCC">
+<title>TB Activation Tracker</title>
+<style>
+:root{
+  --bg:#0d1117; --card:#161b22; --card2:#1c2330; --line:#2d333b;
+  --txt:#e6edf3; --dim:#8b949e; --accent:#4ea1ff;
+  --se:#3fb950; --lss:#4ea1ff; --str:#f47b5d; --hic:#ffa657; --gc:#bc8cff;
+  --test:#e3b341; --rest:#545d68; --done:#3fb950; --skip:#8b949e;
+  --safe-top:env(safe-area-inset-top,0px); --safe-bot:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:16px;overscroll-behavior-y:none}
+body{padding-top:var(--safe-top)}
+#app{max-width:560px;margin:0 auto;padding:12px 14px calc(84px + var(--safe-bot))}
+h1{font-size:1.15rem;font-weight:700;letter-spacing:.02em}
+.hdr{display:flex;align-items:baseline;justify-content:space-between;margin:6px 0 14px}
+.hdr small{color:var(--dim);font-size:.78rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:10px}
+.next-title{font-size:1.25rem;font-weight:700;margin:2px 0 2px}
+.next-sub{color:var(--dim);font-size:.9rem;margin-bottom:8px}
+.pill{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:99px;text-transform:uppercase}
+.line{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.92rem}
+.line:last-child{border-bottom:none}
+.line .nm{flex:1}
+.line .sc{color:var(--dim);text-align:right;white-space:nowrap}
+.line .wt{color:var(--test);font-weight:600;white-space:nowrap}
+.btnrow{display:flex;gap:8px;margin-top:12px}
+button{font:inherit;border:none;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer}
+.b-pri{background:var(--done);color:#04150a;flex:1}
+.b-sec{background:var(--card2);color:var(--txt);border:1px solid var(--line)}
+.b-ghost{background:none;color:var(--dim);border:1px solid var(--line)}
+.b-danger{background:#da3633;color:#fff}
+.weekrow{margin-bottom:10px}
+.weekhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;font-size:.85rem}
+.weekhead b{font-size:.92rem}
+.weekhead span{color:var(--dim);font-size:.75rem}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.day{position:relative;border-radius:9px;padding:7px 2px 6px;text-align:center;font-size:.62rem;font-weight:700;letter-spacing:.02em;border:1px solid var(--line);background:var(--card2);color:var(--dim);min-height:46px;cursor:pointer}
+.day .dn{display:block;font-size:.58rem;font-weight:400;opacity:.7;margin-bottom:2px}
+.day.t-se{border-color:var(--se);color:var(--se)}
+.day.t-lss{border-color:var(--lss);color:var(--lss)}
+.day.t-str{border-color:var(--str);color:var(--str)}
+.day.t-hic{border-color:var(--hic);color:var(--hic)}
+.day.t-gc{border-color:var(--gc);color:var(--gc)}
+.day.t-test{border-color:var(--test);color:var(--test)}
+.day.t-rest{opacity:.55}
+.day.done{background:rgba(63,185,80,.16)}
+.day.done::after{content:"✓";position:absolute;top:2px;right:4px;font-size:.6rem;color:var(--done)}
+.day.skip{opacity:.4}
+.day.skip::after{content:"–";position:absolute;top:1px;right:5px;color:var(--skip)}
+.day.today-ring{box-shadow:0 0 0 2px var(--accent)}
+.day .hv{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#ff5c8a}
+.phase-label{display:flex;align-items:center;gap:8px;margin:20px 0 10px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim)}
+.phase-label::after{content:"";flex:1;height:1px;background:var(--line)}
+.prog-wrap{background:var(--card2);border-radius:99px;height:8px;overflow:hidden;margin:6px 0 4px}
+.prog-bar{height:100%;border-radius:99px;background:var(--accent)}
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--card2);border-radius:12px;padding:12px;text-align:center}
+.stat .v{font-size:1.5rem;font-weight:700}
+.stat .l{font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+#tabbar{position:fixed;bottom:0;left:0;right:0;background:rgba(13,17,23,.92);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 0 calc(8px + var(--safe-bot));z-index:50}
+#tabbar button{background:none;color:var(--dim);font-size:.68rem;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 16px;font-weight:600}
+#tabbar button.on{color:var(--accent)}
+#tabbar .ic{font-size:1.25rem;line-height:1}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:none;align-items:flex-end}
+#modal.open{display:flex}
+#modal .sheet{background:var(--card);border-radius:18px 18px 0 0;width:100%;max-width:560px;margin:0 auto;max-height:86vh;overflow-y:auto;padding:18px 18px calc(24px + var(--safe-bot))}
+.sheet .grab{width:36px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
+.sheet h3{font-size:1.2rem;margin:6px 0 2px}
+.sheet .when{color:var(--dim);font-size:.85rem;margin-bottom:12px}
+.def{background:var(--card2);border-radius:10px;padding:12px;font-size:.88rem;line-height:1.5;color:#c9d1d9;margin-top:12px;white-space:pre-line}
+.note{font-size:.8rem;color:var(--dim);line-height:1.45;margin-top:10px}
+input,select{font:inherit;background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px 12px;width:100%}
+label{display:block;font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px}
+.maxgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.maxgrid .mx label{margin-top:0}
+.hevy-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.hevy-item:last-child{border:none}
+.hevy-item .t{color:var(--dim);font-size:.78rem}
+.banner{background:rgba(227,179,65,.12);border:1px solid rgba(227,179,65,.4);color:var(--test);border-radius:10px;padding:10px 12px;font-size:.82rem;line-height:1.4;margin-bottom:12px}
+.overdue{color:var(--hic);font-size:.8rem;font-weight:600}
+.small{font-size:.78rem;color:var(--dim);line-height:1.5}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav id="tabbar">
+  <button data-tab="today"><span class="ic">◉</span>Today</button>
+  <button data-tab="plan"><span class="ic">▤</span>Plan</button>
+  <button data-tab="stats"><span class="ic">◔</span>Stats</button>
+  <button data-tab="settings"><span class="ic">⚙</span>Setup</button>
+</nav>
+<div id="modal"><div class="sheet" id="sheet"></div></div>
+
+<script>
+"use strict";
+/* ================= STATE ================= */
+const LSKEY="tb3_activation_v1";
+const DAYMS=86400000;
+let state=null;
+function defaultState(){
+  const status={};
+  // Seeded: started Mon 2026-06-29, completed through Week 2 Day 4
+  for(let d=1;d<=7;d++) status["1."+d]="done";
+  for(let d=1;d<=4;d++) status["2."+d]="done";
+  return {start:"2026-06-29", key:"", units:"lb", maxes:{}, status, notes:{}, deloads:[], hevy:{byDate:{},last:null}};
+}
+function load(){ try{const raw=localStorage.getItem(LSKEY); state=raw?Object.assign(defaultState(),JSON.parse(raw)):defaultState();}catch(e){state=defaultState();} }
+function save(){ localStorage.setItem(LSKEY,JSON.stringify(state)); }
+
+/* ================= PLAN DATA ================= */
+const MAXKEYS=[["bench","Bench Press"],["squat","Squat"],["dead","Deadlift"],["row","Barbell/Pendlay Row"],["rack","Rack Pull"],["ohp","Overhead Press"],["pc","Power Clean"],["pp","Push Press"]];
+const S=(tag,title,sub,lines,def,notes)=>({tag,title,sub:sub||"",lines:lines||[],def:def||null,notes:notes||[]});
+const REST=S("rest","Rest","Recovery day");
+
+function abLine(){return {nm:"Finisher: Ab Triad",sc:"3 x 5",def:"abtriad"};}
+function basePlan(){
+  const seW={1:[10,10,10],2:[15,15,15],3:[20,20,20],4:[25,25,25]};
+  const lssW={1:[30,30,35],2:[40,40,45],3:[50,50,55],4:[60,60,60]};
+  const wks=[];
+  for(let w=1;w<=4;w++){
+    const days=[];
+    const circ=[3,3,4];
+    for(let i=0;i<3;i++){
+      days.push(S("se","SE Circuit",circ[i]+" circuits × "+seW[w][i]+" reps",[
+        {nm:"Push-ups",sc:circ[i]+" x "+seW[w][i]},
+        {nm:"DB/KB Goblet Squat",sc:circ[i]+" x "+seW[w][i]},
+        {nm:"Inverted Row",sc:circ[i]+" x "+seW[w][i]},
+        abLine()
+      ],"se"));
+    }
+    const wk=[days[0],
+      S("lss","LSS Run",lssW[w][0]+" min",[{nm:"Easy conversational run",sc:lssW[w][0]+" min"}],"lss"),
+      days[1],
+      S("lss","LSS Run",lssW[w][1]+" min",[{nm:"Easy conversational run",sc:lssW[w][1]+" min"}],"lss"),
+      days[2],
+      S("lss","LSS Run",lssW[w][2]+" min",[{nm:"Easy conversational run",sc:lssW[w][2]+" min"}],"lss"),
+      REST];
+    wks.push({phase:"Base",phaseWeek:w,days:wk});
+  }
+  const testS=S("test","1RM Testing","Establish 1RMs for Armor",[
+    {nm:"Bench Press",sc:"work to 1-3RM"},{nm:"Barbell Row",sc:"work to 1-3RM"},
+    {nm:"Squat",sc:"work to 1-3RM"},{nm:"Deadlift",sc:"work to 1-3RM"},
+    {nm:"Rack Pull",sc:"work to 1-3RM"},{nm:"Overhead Press",sc:"work to 1-3RM"}
+  ],"testing",["Spread testing across the 3 days however you like — single session or split.","Enter results under Setup → Maxes so Armor weights auto-fill."]);
+  wks.push({phase:"Base",phaseWeek:5,label:"Rest & Test",days:[REST,REST,testS,testS,testS,REST,REST]});
+  return wks;
+}
+function zuluWeek(bw,blockNo){
+  // bw = 1..3 within block
+  const main1=[["4 x 8","70"],["4 x 5","80"],["4 x 3","85"]][bw-1];
+  const main2=[["3 x 8","75"],["3 x 5","80"],["3 x 3","85"]][bw-1];
+  const dlSets=[3,2,1][bw-1];
+  const supPct=[65,70,75][bw-1];
+  const supp=(v)=>({nm:"Supp "+v+(v==="A"?": Rev-Hyper/Back Ext + Ab Triad":": Pullups/Inv Rows + OHP"),sc:"3-5 x 8-10 @ "+supPct+"%",pct:v==="B"?{lift:"ohp",p:supPct}:null});
+  const d1=S("str","Zulu — Squat Day",main1[0]+" @ "+main1[1]+"%",[
+    {nm:"Squat",sc:main1[0]+" @ "+main1[1]+"%",pct:{lift:"squat",p:+main1[1]}},
+    {nm:"Rack Pull",sc:main1[0]+" @ "+main1[1]+"%",pct:{lift:"rack",p:+main1[1]}},
+    supp("A")],"zulu");
+  const d2=S("str","Zulu — Bench Day",main1[0]+" @ "+main1[1]+"%",[
+    {nm:"Bench Press",sc:main1[0]+" @ "+main1[1]+"%",pct:{lift:"bench",p:+main1[1]}},
+    {nm:"Barbell Row",sc:main1[0]+" @ "+main1[1]+"%",pct:{lift:"row",p:+main1[1]}},
+    supp("B")],"zulu");
+  const d4=S("str","Zulu — Squat/DL Day",main2[0]+" @ "+main2[1]+"%",[
+    {nm:"Squat",sc:main2[0]+" @ "+main2[1]+"%",pct:{lift:"squat",p:+main2[1]}},
+    {nm:"Deadlift",sc:dlSets+" x "+main2[0].split(" x ")[1]+" @ "+main2[1]+"%",pct:{lift:"dead",p:+main2[1]}},
+    supp("A")],"zulu",["Deadlift: week "+bw+" of block = "+dlSets+" work set"+(dlSets>1?"s":"")+"."]);
+  const d6=S("str","Zulu — Bench Day",main2[0]+" @ "+main2[1]+"%",[
+    {nm:"Bench Press",sc:main2[0]+" @ "+main2[1]+"%",pct:{lift:"bench",p:+main2[1]}},
+    {nm:"Barbell Row",sc:main2[0]+" @ "+main2[1]+"%",pct:{lift:"row",p:+main2[1]}},
+    supp("B")],"zulu");
+  const lss=S("lss","LSS","60 min",[{nm:"LSS — bike/rower/elliptical OK this block",sc:"60 min"}],"lss-armor");
+  return {phase:"Armor",phaseWeek:(blockNo-1)*3+bw,label:"Zulu Block "+blockNo+" · Wk "+bw,days:[d1,d2,lss,d4,lss,d6,REST]};
+}
+function operatorLift(scheme,pct,peak){
+  if(peak) return null;
+  return {scheme,pct};
+}
+function opWeek(bw){
+  // bw 1..12 (Blue 1-6, Black 7-12)
+  const isBlack=bw>6;
+  const setsPrefix=isBlack?"3-5 x ":"";
+  const schemes={1:["3 x 5",75],2:["4 x 5",80],3:["5 x 3",85],4:["4 x 5",75],5:["3 x 5",80],7:["5",75],8:["5",80],9:["3",85],10:["5",75],11:["5",80]};
+  const condBlue={1:["LSS 60","LSS 60","Hill Sprints x 6-8"],2:["LSS 30-60","LSS 30-60","LSS 30-60"],3:["LSS 60","LSS 60","Hill Sprints x 6-8"],4:["LSS 30-60","LSS 30-60","LSS 30-60"],5:["LSS 60","LSS 60","Hill Sprints x 6-8"],6:["LSS 30","LSS 30","LSS 30"]};
+  const condBlack={7:["Trail Run 60-90","LSS 60-90","4x8 Interval Run"],8:["Afterburner 60-90","LSS 60-90","Hill Sprints x 8-10"],9:["Trail Run 60-90","LSS 60-90","4x8 Interval Run"],10:["Afterburner 60-90","LSS 60-90","Hill Sprints x 8-10"],11:["Trail Run 60-90","LSS 60-90","4x8 Interval Run"],12:["LSS 30","LSS 30","LSS 30"]};
+  const cond=isBlack?condBlack[bw]:condBlue[bw];
+  const condDef=(t)=>t.startsWith("Hill")?"hill":t.startsWith("4x8")?"i48":t.startsWith("Trail")?"tr":t.startsWith("After")?"ab":"lss";
+  const condS=(t)=>S(t.startsWith("Hill")||t.startsWith("4x8")?"hic":"lss",t.split(" x ")[0],t,[{nm:t,sc:""}],condDef(t));
+  const peak=bw===6||bw===12;
+  let d1,d3,d5;
+  if(peak){
+    d1=S("test","PEAK — Squat","1 x 3 @ 85%+ then push",[{nm:"Squat",sc:"1 x 3 @ 85%+",pct:{lift:"squat",p:85}}],"peaking",["Peak on Days 1, 4 and 7 — take the extra rest day between sessions.","Conditioning is minimized this week."]);
+    d3=S("test","PEAK — Bench","1 x 3 @ 85%+ then push",[{nm:"Bench Press",sc:"1 x 3 @ 85%+",pct:{lift:"bench",p:85}}],"peaking");
+    d5=S("test","PEAK — Deadlift","1 x 3 @ 85%+ then push",[{nm:"Deadlift",sc:"1 x 3 @ 85%+",pct:{lift:"dead",p:85}}],"peaking");
+  }else{
+    const [reps,pct]=schemes[bw];
+    const sch=setsPrefix+reps+" @ "+pct+"%";
+    d1=S("str","Operator A",sch,[
+      {nm:"Bench Press",sc:sch,pct:{lift:"bench",p:pct}},
+      {nm:"Squat",sc:sch,pct:{lift:"squat",p:pct}},
+      {nm:"Barbell Row",sc:sch,pct:{lift:"row",p:pct}},
+      abLine()],"operator");
+    d3=S("str","Operator A",sch,[
+      {nm:"Bench Press",sc:sch,pct:{lift:"bench",p:pct}},
+      {nm:"Squat",sc:sch,pct:{lift:"squat",p:pct}},
+      {nm:"Barbell Row",sc:sch,pct:{lift:"row",p:pct}},
+      abLine()],"operator");
+    d5=S("str","Operator B",sch,[
+      {nm:"Bench Press",sc:sch,pct:{lift:"bench",p:pct}},
+      {nm:"Deadlift",sc:"1-3 x "+reps.split(" x ").pop()+" @ "+pct+"%",pct:{lift:"dead",p:pct}},
+      {nm:"Barbell Row",sc:sch,pct:{lift:"row",p:pct}},
+      abLine()],"operator",["Deadlift: 1-3 work sets. Reposition DL or HIC within the week if recovery suffers."]);
+  }
+  const notes=[];
+  if(bw===7) notes.push("Force Progression before Black: add 2.5-5 lb to upper-body 1RMs, 5-10 lb to lower-body 1RMs. An (invisible) deload week after Blue Week 6 is recommended — insert one from the Plan tab if you take it.");
+  const wk={phase:"Operator",phaseWeek:bw,label:(isBlack?"Black":"Blue")+" · Wk "+bw,days:[d1,condS(cond[0]),d3,condS(cond[1]),d5,condS(cond[2]),REST],notes};
+  return wk;
+}
+function opTestWeek(){
+  const t=S("test","1RM Testing","Establish numbers for Vertex/Breacher",[
+    {nm:"Power Clean",sc:"work to 1-3RM"},{nm:"Push Press",sc:"work to 1-3RM"},{nm:"Pendlay Row",sc:"work to 1-3RM"}
+  ],"testing",["Squat, Bench, Row: carry over from last block — no need to retest.","Test mid-to-late week; one or two days."]);
+  return {phase:"Operator",phaseWeek:13,label:"Rest & Test",days:[REST,REST,REST,t,t,REST,REST]};
+}
+function breacher(vw,dayVariant){
+  const pc=[["3 x 3","65"],["4 x 2","70"],["5 x 1","75"]][vw-1];
+  const cs=[["3 x 5"],["4 x 4"],["5 x 3"]][vw-1][0];
+  const lines = dayVariant===1 ? [
+    {nm:"Power Clean",sc:pc[0]+" @ "+pc[1]+"%",pct:{lift:"pc",p:+pc[1]}},
+    {nm:"Squat @ 85% + Jump Squat",sc:cs+" (contrast)",pct:{lift:"squat",p:85}},
+    {nm:"Bench @ 85% + Plyo Push-up",sc:cs+" (contrast)",pct:{lift:"bench",p:85}}
+  ] : [
+    {nm:"Push Press",sc:pc[0]+" @ "+pc[1]+"%",pct:{lift:"pp",p:+pc[1]}},
+    {nm:"Row @ 85% + Pendlay Row (explosive)",sc:cs+" (contrast)",pct:{lift:"row",p:85}},
+    {nm:"Squat @ 85% + Jump Squat",sc:cs+" (contrast)",pct:{lift:"squat",p:85}}
+  ];
+  return S("str","Breacher","Power / contrast sets",lines,"breacher");
+}
+function gcS(key,title,sub){return S("gc",title,sub||"Work Capacity",[],key);}
+function vertexPlan(){
+  const wks=[];
+  const gcByWeek={1:["gc1","gc9"],2:["gc3","peggy"],3:["gc7","gc12"]};
+  const gcTitle={gc1:"GC1 — Beat Your Face",gc3:"GC3 — Brig Rat",gc7:"GC7",gc9:"GC9",gc11:"GC11 — Outside the Wire",gc12:"GC12",peggy:"Peggy's Hills 30",sildi:"Sildi Suicides 45",hic37:"HIC 37 — BW Plyo/Power",hic39:"HIC 39 — Kinetic Conditioning"};
+  for(let vw=1;vw<=3;vw++){
+    const [g1,g2]=gcByWeek[vw];
+    wks.push({phase:"Vertex",phaseWeek:vw,days:[
+      breacher(vw,1), gcS(g1,gcTitle[g1]), REST, breacher(vw,2), REST, gcS(g2,gcTitle[g2]), REST
+    ]});
+  }
+  wks.push({phase:"Vertex",phaseWeek:4,label:"Finale",days:[
+    S("hic","HIC 37 — BW Plyo/Power","Power HIC",[],"hic37"), REST,
+    gcS("gc11",gcTitle.gc11), REST,
+    S("hic","HIC 39 — Kinetic Conditioning","Power HIC",[],"hic39"), REST,
+    gcS("sildi",gcTitle.sildi,"The final rep. 45 minutes.")
+  ]});
+  return wks;
+}
+function buildPlan(){
+  const wks=[...basePlan()];
+  wks.push(zuluWeek(1,1),zuluWeek(2,1),zuluWeek(3,1),zuluWeek(1,2),zuluWeek(2,2),zuluWeek(3,2));
+  for(let b=1;b<=12;b++) wks.push(opWeek(b));
+  wks.push(opTestWeek());
+  wks.push(...vertexPlan());
+  wks.forEach((w,i)=>w.n=i+1);
+  return wks;
+}
+const PLAN=buildPlan();
+
+/* ============ SESSION DEFINITIONS (Appendix A/B refs) ============ */
+const DEFS={
+se:"Strength-Endurance circuit. Do the exercises back-to-back as a circuit.\nRest ~60-90 sec between sets/exercises, 2-5 min between circuits. If you fail mid-set, rest briefly and carry on until the set is complete.\nGoblet squats: light weight (~10-30 lb), same weight all block.\nAb Triad is NOT part of the circuit — do 3 x 5 at the end after all SE work.",
+lss:"Low Intensity / Steady State. Jog continuously at an easy conversational pace — flat ground or treadmill preferred.\nStay in zone: talk test (best), RPE 4-5/10, or ~60-70% max HR.\nDon't walk to stay in zone 2 — jog at your slowest conversational pace and ignore HR until fitness catches up.",
+"lss-armor":"LSS this block: 120 min/week total, minimum 30 min per session. Jogging encouraged, but easier modes are fine — bike, rower, elliptical. Can be done before or after Zulu sessions or moved within the week.",
+abtriad:"Hanging Leg Raise x 5 · Hanging Knee Raise x 5 · Hanging Toes-to-Bar x 5 · x 3-5 rounds.\nHollow-body hang, slight posterior pelvic tilt, shoulders packed. Rest as needed.\nProgress toward all 3 movements unbroken (15 continuous reps), then continuous circuits, then bump to 10 reps each.\nEasier: use an ab station with elbow rests; sub another movement for toes-to-bar.",
+hill:"Hill Sprints: sprint uphill ~10 seconds at max effort. Walk back down to recover — take 2-5 min total rest between sprints. Steep is good. No hill? Sub 400M repeats, same number of rounds.",
+i48:"4 x 8 Interval Run:\n• Warmup jog x 10 min\n• Run x 8 min @ ~85-90% max HR (10k race pace)\n• Recovery jog x 2 min\n• Repeat for 4 intervals total\n• Cooldown jog x 5 min\nHard but controlled — you should feel able (not eager) to do one more.",
+r400:"400 Meter Repeats: run 400m at your fastest sustainable pace, jog/walk 400m to recover. 4-15+ rounds or as prescribed.",
+tr:"Trail Run: ideally trails with hills/irregular terrain. Overall pace conversational but mix it up — sprint the occasional hill, speed-walk some, jog flats/downhills.",
+vir:"Variable Intensity Run — the 'Rocky Run'. Easy jog through streets; vary intensity occasionally: stairs, side-to-sides, occasional 30-50m sprint. Overall session stays low intensity.",
+ab:"Afterburner: finish your LSS with 3-5 sprints of 30-60 sec each, resting 2-5 min between sprints. Works with any LSS mode.",
+clc:"Continuous Loaded Carry: KB/DB carry x 30-120 min. Single-arm/suitcase or farmer's walk, light-moderate weight, brisk conversational pace. Brief breaks if grip fails.",
+ruck:"Ruck / Weight Vest Hike: load 10-20% bodyweight, walk/hike continuously 30-120 min. Conversational pace, ignore HR.",
+peggy:"Pegasus Hills. Hill with 30-100m of runway (or stairs). KB/DB at the top. Set a timer (30 min here).\nJog up and down continuously at a sustainable pace; every time you hit the top do 10 KB swings (or 25 push-ups if no bell).\nContinuous movement, low gear, slow and steady. Rest as needed — long-term goal is no rest. Doubles as Work Capacity.",
+sildi:"Sildi Suicides. Steep hill + pair of DBs/KBs (start ~10-30 lb per bell). Set timer (45 min here).\nFarmer-carry the bells up, jog down empty, jog back up, hike the bells down, drop them, hike back up empty, carry them up again… repeat until time.\nRest as needed; long-term goal is continuous work at a brisk pace. No equipment? Peggy x 45 or Kettlebell Cricket x 5 rounds. This is the final rep of Activation.",
+gc1:"GC1 — Beat Your Face:\n• Burpees x 3 min / Rest x 3 min\n• Burpees x 2 min / Rest x 2 min\n• Burpees x 1 min / Rest x 1 min\n• x 1-3 rounds\nAs many burpees as you can in each window, methodical not spazzy. Burpee type doesn't matter.",
+gc3:"GC3 — Brig Rat:\n• Burpees x 30 sec / Dips x 30 sec\n• Burpees x 30 sec / Squats x 30 sec\n• Burpees x 30 sec / Back Extensions x 30 sec\n• Rest 1 min · x 3-5 rounds\nSquats are bodyweight. Planks or bicycle crunches can sub for back extensions.",
+gc7:"GC7 — For time:\n• Burpees x 50\n• Squats x 50\n• Diamond Push-ups x 50\n• Run 800M\n• x 3-5 rounds\nBest done on a track; treadmill OK.",
+gc9:"GC9:\nA) AMRAP 10 min — Pull-up x 3 / Burpees x 5 / Squats x 10\nB) 10 x 100M Sprints\nComplete A before moving to B.",
+gc11:"GC11 — Outside the Wire:\nA) Sprint x 100M + Bear Crawl x 50M — x 3-5 rounds, for time\nB) 100 Sledgehammer/Tire Strikes — for time\n(B alternatives: 100 burpees / 100 KB swings / 50 tire flips)\nComplete A before B.",
+gc12:"GC12:\nA) 1.5 Mile Run — for time\nB) Barbell Push-Press x 20 · Back Extensions x 20 · Pull-ups x 20 — x 3-5 rounds, for time\nGo light on push-press (~15-30% 1RM). Pull-up alternatives: negatives, assisted, band.",
+kbcricket:"Kettlebell Cricket: pair of KBs/DBs + 100m runway. One bell at start, one 100m away. Run between them — 10 swings at one end, 10 goblet squats at the other. A round = 50 total reps. For time; rest 5 min between rounds; 2-5 rounds. Push-ups/air squats can sub.",
+rescuerun:"Rescue Run: 3-5k jog carrying a KB/DB (start light, 16-20 kg), done for time. Rest and set the bell down as needed — work toward a continuous carry.",
+hic37:"HIC 37 — BW Plyo/Power:\nA) Plyo Push-ups x 10 · Jump Squats x 10 · Plyo Pull-ups x 5 — rest 1-2 min between exercises, x 3-5 rounds\nB) 50M sprints x 5 — rest 3-5 min between sprints\nExplosive and crisp; max speed on the concentric.",
+hic39:"HIC 39 — Kinetic Conditioning:\n• Sprint 50M + Explosive Plyo Push-ups x 5 — rest 3-5 min\n• Sprint 50M + Explosive Squat Jumps x 5 — rest 3-5 min\n• x 3 rounds\nLong rests keep ATP-CP topped up for max power output.",
+zulu:"Zulu template: use % of 1RM entered in Setup. Rest as needed between sets.\nSupp A: Reverse Hyper/Ab Triad or Back Extensions/Ab Triad.\nSupp B: Pullups/Overhead Press or Inverted Rows/Overhead Press. Max Reps technique can be used for pullups/bodyweight work.",
+operator:"Operator: main lifts at % of 1RM. Sets not rigidly prescribed in Black weeks (3-5) — play with volume and find your rhythm.\nWeighted pullups can sub for rows. HIC can be repositioned in the week to fit your schedule.",
+breacher:"Breacher: contrast training. Do the heavy lift (85% 1RM), then immediately the explosive movement, that's one set.\nPower primer (~85%RM) doesn't have to be an accurate max — just get a heavy double or single in.\nRest fully between sets — quality of speed is the point.",
+peaking:"Peak Week: one main lift per session, days 1/4/7 (extra rest between). Warm up to 1 x 3 @ 85%, then pick ONE:\n• PEAK: keep adding 2.5-10 lb, rep out triples/doubles/singles, work to a PR if you like.\n• AMSAP: as many sets of 3 @ 85% as you want, rested between sets.\n• AMRAP: 3-5 x 3 @ 85%; on the final set don't stop at 3.\nNo peak? Do your cluster at week-3 loads. New PRs are for progress-checking — NOT for programming the next block.",
+testing:"1RM testing: warm up with light sets, pyramid up to a solid 2-3RM. Plug into any online 1RM calculator — that's your number.\nDoesn't need to be perfect; Forced Progression (+2.5-5 lb upper / +5-10 lb lower per block) takes over from here.",
+deload:"Deload — active recovery week (invisible, doesn't count as a program week).\nStrength: ~3 sets x 3-5 @ 65-70% per session, or easy calisthenics 3x/week (push-ups, single-leg squats, chins/inverted rows 3-5 x 5-10).\nConditioning: drop all HIC. 2-4 x 30 min LSS over the week — cycling/swimming are good here.",
+rest:"Rest day. Walks, easy hikes, swimming, stretching are fine."
+};
+
+/* ================= DATE HELPERS ================= */
+const fmtD=(d)=>d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+const iso=(d)=>{const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());};
+function startDate(){const [y,m,d]=state.start.split("-").map(Number);return new Date(y,m-1,d);}
+function deloadsBefore(w){return state.deloads.filter(x=>x<w).length;}
+function calIndexOfWeek(w){return (w-1)+deloadsBefore(w);}
+function dateOfDay(w,d){const t=new Date(startDate());t.setDate(t.getDate()+calIndexOfWeek(w)*7+(d-1));return t;}
+function totalCalWeeks(){return PLAN.length+state.deloads.length;}
+function todayPos(){
+  const t=new Date();t.setHours(0,0,0,0);
+  const ds=Math.floor((t-startDate())/DAYMS);
+  if(ds<0)return {before:true};
+  const cw=Math.floor(ds/7), dn=ds%7+1;
+  // map calendar week -> program week or deload
+  let ci=0;
+  for(const wk of PLAN){
+    const dl=state.deloads.includes(wk.n-1)?1:0; // deload inserted after week n-1 sits before this week
+    // build sequence instead:
+    void dl;
+  }
+  // simpler: walk sequence
+  let seq=[];
+  for(const wk of PLAN){ seq.push({kind:"week",wk}); if(state.deloads.includes(wk.n)) seq.push({kind:"deload",after:wk.n}); }
+  if(cw>=seq.length) return {after:true};
+  return {entry:seq[cw],day:dn,calWeek:cw};
+}
+function sessionsChrono(){
+  const out=[];
+  for(const wk of PLAN) for(let d=1;d<=7;d++){ out.push({w:wk.n,d,wk,s:wk.days[d-1]}); }
+  return out;
+}
+function nextUp(){
+  const all=sessionsChrono().filter(x=>x.s.tag!=="rest");
+  return all.find(x=>!state.status[x.w+"."+x.d]);
+}
+/* ================= WEIGHTS ================= */
+function weightFor(pct){
+  if(!pct)return null;
+  const m=state.maxes[pct.lift];
+  if(!m)return null;
+  const raw=m*pct.p/100;
+  return Math.round(raw/5)*5;
+}
+/* ================= HEVY ================= */
+async function hevySync(btn){
+  const key=state.key.trim();
+  if(!key){alert("Add your Hevy API key in Setup first (hevy.com → Settings → API).");return;}
+  if(btn){btn.disabled=true;btn.textContent="Syncing…";}
+  try{
+    const byDate={...state.hevy.byDate};
+    let page=1,pages=1,fetched=0;
+    const cutoff=new Date(startDate());cutoff.setDate(cutoff.getDate()-7);
+    while(page<=pages&&page<=15){
+      const r=await fetch("https://api.hevyapp.com/v1/workouts?page="+page+"&pageSize=10",{headers:{"api-key":key}});
+      if(r.status===401)throw new Error("Invalid API key (401).");
+      if(!r.ok)throw new Error("Hevy error "+r.status);
+      const j=await r.json();
+      pages=j.page_count||1;
+      let older=false;
+      for(const w of (j.workouts||[])){
+        const st=new Date(w.start_time);
+        if(st<cutoff){older=true;continue;}
+        const en=w.end_time?new Date(w.end_time):null;
+        let vol=0,sets=0;
+        (w.exercises||[]).forEach(e=>(e.sets||[]).forEach(s=>{sets++;vol+=(s.weight_kg||0)*(s.reps||0);}));
+        const rec={id:w.id,title:w.title||"Workout",start:w.start_time,mins:en?Math.round((en-st)/60000):null,vol:Math.round(vol*2.20462),sets,ex:(w.exercises||[]).length};
+        const k=iso(st);
+        byDate[k]=byDate[k]||[];
+        const idx=byDate[k].findIndex(x=>x.id===rec.id);
+        if(idx>=0)byDate[k][idx]=rec;else byDate[k].push(rec);
+        fetched++;
+      }
+      if(older)break;
+      page++;
+    }
+    state.hevy={byDate,last:new Date().toISOString()};
+    save();render();
+    alert("Synced "+fetched+" workouts from Hevy.");
+  }catch(e){
+    alert("Sync failed: "+e.message);
+  }
+  if(btn){btn.disabled=false;btn.textContent="Sync Hevy";}
+}
+function hevyFor(w,d){ return state.hevy.byDate[iso(dateOfDay(w,d))]||[]; }
+
+/* ================= RENDER ================= */
+let tab="today";
+const app=document.getElementById("app");
+const TAGCLR={se:"var(--se)",lss:"var(--lss)",str:"var(--str)",hic:"var(--hic)",gc:"var(--gc)",test:"var(--test)",rest:"var(--rest)"};
+const TAGNAME={se:"SE",lss:"LSS",str:"Strength",hic:"HIC",gc:"Work Cap",test:"Test/Peak",rest:"Rest"};
+function pill(tag){return '<span class="pill" style="background:'+TAGCLR[tag]+'22;color:'+TAGCLR[tag]+'">'+TAGNAME[tag]+"</span>";}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function dayShort(s){
+  if(s.tag==="rest")return "Rest";
+  if(s.tag==="se")return "SE";
+  if(s.title.startsWith("LSS"))return s.sub.replace(" min","′").replace("60 min — bike/rower/elliptical OK","60′");
+  if(s.tag==="lss")return s.title.replace("LSS ","LSS").replace("Trail Run","TR").replace("Afterburner","AB");
+  if(s.title.startsWith("Zulu"))return s.title.includes("Squat/DL")?"SQ/DL":s.title.includes("Squat")?"SQ/RP":"BP/Row";
+  if(s.title.startsWith("Operator"))return s.title.replace("Operator ","Op ");
+  if(s.title.startsWith("PEAK"))return "PEAK";
+  if(s.title.startsWith("Breacher"))return "Breach";
+  if(s.title.startsWith("GC"))return s.title.split(" ")[0];
+  if(s.title.startsWith("HIC"))return s.title.split(" — ")[0].replace(" ","");
+  if(s.title.includes("Peggy"))return "Peggy";
+  if(s.title.includes("Sildi"))return "Sildi";
+  if(s.tag==="test")return "Test";
+  if(s.tag==="hic")return "HIC";
+  return s.title.slice(0,6);
+}
+function statusOf(w,d){return state.status[w+"."+d]||null;}
+function weekRow(wk,highlight){
+  const tp=todayPos();
+  let html='<div class="weekrow"><div class="weekhead"><b>Week '+wk.n+'</b><span>'+esc(wk.phase+(wk.label?" · "+wk.label:" · Wk "+wk.phaseWeek))+' · '+fmtD(dateOfDay(wk.n,1))+"</span></div><div class='days'>";
+  for(let d=1;d<=7;d++){
+    const s=wk.days[d-1];
+    const st=statusOf(wk.n,d);
+    const isToday=tp.entry&&tp.entry.kind==="week"&&tp.entry.wk.n===wk.n&&tp.day===d;
+    const hevy=hevyFor(wk.n,d).length?'<span class="hv"></span>':"";
+    html+='<div class="day t-'+s.tag+(st==="done"?" done":st==="skip"?" skip":"")+(isToday?" today-ring":"")+'" onclick="openDetail('+wk.n+","+d+')"><span class="dn">D'+d+"</span>"+esc(dayShort(s))+hevy+"</div>";
+  }
+  html+="</div>";
+  if(state.deloads.includes(wk.n)){
+    html+='<div class="banner" style="margin-top:8px">Deload week inserted after Week '+wk.n+' <button class="b-ghost" style="padding:2px 8px;font-size:.7rem;margin-left:6px" onclick="toggleDeload('+wk.n+')">remove</button><div class="small" style="margin-top:4px">'+esc(DEFS.deload.split("\n")[0])+"</div></div>";
+  }
+  html+="</div>";
+  return html;
+}
+function renderToday(){
+  const tp=todayPos();
+  let html='<div class="hdr"><h1>Tactical Barbell · Activation</h1><small>started '+fmtD(startDate())+"</small></div>";
+  if(tp.before){html+='<div class="card">Program starts '+fmtD(startDate())+".</div>";app.innerHTML=html;return;}
+  if(tp.after){html+='<div class="card"><h2>Program complete</h2>Cyborgs only. 25 weeks in the books — you earned it. 🏁</div>';}
+  // today card
+  if(tp.entry){
+    if(tp.entry.kind==="deload"){
+      html+='<div class="card"><h2>This week</h2><div class="next-title">Deload Week</div><div class="def">'+esc(DEFS.deload)+"</div></div>";
+    }else{
+      const wk=tp.entry.wk,d=tp.day,s=wk.days[d-1];
+      const st=statusOf(wk.n,d);
+      html+='<div class="card"><h2>Today — Week '+wk.n+" · Day "+d+"</h2>"+pill(s.tag)+
+        '<div class="next-title">'+esc(s.title)+'</div><div class="next-sub">'+esc(s.sub)+"</div>"+
+        linesHtml(s)+
+        '<div class="btnrow">'+
+        (s.tag!=="rest"?'<button class="b-pri" onclick="setStatus('+wk.n+","+d+",'done')\">"+(st==="done"?"✓ Done":"Mark Done")+"</button>":"")+
+        '<button class="b-sec" onclick="openDetail('+wk.n+","+d+')">Details</button></div></div>';
+    }
+  }
+  // up next
+  const nx=nextUp();
+  if(nx){
+    const dt=dateOfDay(nx.w,nx.d);
+    const today=new Date();today.setHours(0,0,0,0);
+    const overdue=dt<today;
+    html+='<div class="card"><h2>Up next</h2>'+pill(nx.s.tag)+
+      '<div class="next-title">'+esc(nx.s.title)+'</div><div class="next-sub">Week '+nx.w+" · Day "+nx.d+" · "+fmtD(dt)+(overdue?' · <span class="overdue">behind schedule</span>':"")+"</div>"+
+      linesHtml(nx.s)+
+      '<div class="btnrow"><button class="b-pri" onclick="setStatus('+nx.w+","+nx.d+",'done')\">Mark Done</button><button class=\"b-sec\" onclick=\"openDetail("+nx.w+","+nx.d+')">Details</button></div></div>';
+  }
+  // this week
+  if(tp.entry&&tp.entry.kind==="week"){
+    html+='<div class="card"><h2>This week</h2>'+weekRow(tp.entry.wk,true)+weekNotes(tp.entry.wk)+"</div>";
+    const hv=[];
+    for(let d=1;d<=7;d++) hevyFor(tp.entry.wk.n,d).forEach(x=>hv.push(x));
+    if(hv.length){
+      html+='<div class="card"><h2>Hevy — this week</h2>'+hv.map(x=>'<div class="hevy-item"><div>'+esc(x.title)+'<div class="t">'+fmtD(new Date(x.start))+"</div></div><div style='text-align:right'>"+(x.mins?x.mins+" min":"")+'<div class="t">'+x.ex+" exercises · "+x.vol.toLocaleString()+" lb</div></div></div>").join("")+"</div>";
+    }
+  }
+  app.innerHTML=html;
+}
+function weekNotes(wk){
+  return (wk.notes&&wk.notes.length)?'<div class="banner">'+esc(wk.notes[0])+"</div>":"";
+}
+function linesHtml(s){
+  if(!s.lines.length)return "";
+  return s.lines.map(l=>{
+    const w=weightFor(l.pct);
+    return '<div class="line"><span class="nm">'+esc(l.nm)+'</span><span class="sc">'+esc(l.sc)+"</span>"+(w?'<span class="wt">'+w+" lb</span>":"")+"</div>";
+  }).join("");
+}
+function renderPlan(){
+  let html='<div class="hdr"><h1>25-Week Plan</h1><small>'+doneCount().done+"/"+doneCount().total+" sessions</small></div>";
+  let phase="";
+  for(const wk of PLAN){
+    if(wk.phase!==phase){phase=wk.phase;html+='<div class="phase-label">'+esc(phase)+"</div>";}
+    html+=weekRow(wk);
+  }
+  html+='<div class="small" style="margin:10px 4px">Tap any day for details, prescribed weights, and to mark done/skipped. Pink dot = Hevy workout logged that day. Long blocks deserve deloads — insert one from a session detail view (bottom of sheet).</div>';
+  app.innerHTML=html;
+}
+function doneCount(){
+  const all=sessionsChrono().filter(x=>x.s.tag!=="rest");
+  return {done:all.filter(x=>statusOf(x.w,x.d)==="done").length,skip:all.filter(x=>statusOf(x.w,x.d)==="skip").length,total:all.length};
+}
+function renderStats(){
+  const c=doneCount();
+  const pct=Math.round(c.done/c.total*100);
+  const phases={};
+  sessionsChrono().filter(x=>x.s.tag!=="rest").forEach(x=>{
+    phases[x.wk.phase]=phases[x.wk.phase]||{done:0,total:0};
+    phases[x.wk.phase].total++;
+    if(statusOf(x.w,x.d)==="done")phases[x.wk.phase].done++;
+  });
+  // adherence: scheduled non-rest sessions up to today
+  const today=new Date();today.setHours(0,0,0,0);
+  const due=sessionsChrono().filter(x=>x.s.tag!=="rest"&&dateOfDay(x.w,x.d)<=today);
+  const dueDone=due.filter(x=>statusOf(x.w,x.d)==="done").length;
+  const adher=due.length?Math.round(dueDone/due.length*100):100;
+  let hevyTotal=0;Object.values(state.hevy.byDate).forEach(a=>hevyTotal+=a.length);
+  let html='<div class="hdr"><h1>Progress</h1><small></small></div>';
+  html+='<div class="card"><h2>Program</h2><div style="font-size:2rem;font-weight:700">'+pct+'%</div><div class="prog-wrap"><div class="prog-bar" style="width:'+pct+'%"></div></div><div class="small">'+c.done+" done · "+c.skip+" skipped · "+(c.total-c.done-c.skip)+" remaining of "+c.total+" sessions</div></div>";
+  html+='<div class="card"><h2>Phases</h2>';
+  for(const [ph,v] of Object.entries(phases)){
+    const p=Math.round(v.done/v.total*100);
+    html+='<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:.85rem"><span>'+ph+'</span><span style="color:var(--dim)">'+v.done+"/"+v.total+'</span></div><div class="prog-wrap"><div class="prog-bar" style="width:'+p+'%"></div></div></div>';
+  }
+  html+="</div>";
+  html+='<div class="statgrid"><div class="stat"><div class="v">'+adher+'%</div><div class="l">Adherence to date</div></div><div class="stat"><div class="v">'+hevyTotal+'</div><div class="l">Hevy workouts synced</div></div></div>';
+  const nx=nextUp();
+  if(nx){
+    const end=dateOfDay(PLAN.length,7);
+    html+='<div class="card" style="margin-top:12px"><h2>Timeline</h2><div class="small">Current: Week '+nx.w+" of "+PLAN.length+" ("+PLAN[nx.w-1].phase+")<br>Projected finish: <b>"+fmtD(end)+"</b>"+(state.deloads.length?" (includes "+state.deloads.length+" deload week"+(state.deloads.length>1?"s":"")+")":"")+"</div></div>";
+  }
+  app.innerHTML=html;
+}
+function renderSettings(){
+  let html='<div class="hdr"><h1>Setup</h1><small></small></div>';
+  html+='<div class="card"><h2>Program</h2><label>Start date (Week 1, Day 1 — a Monday)</label><input type="date" value="'+state.start+'" onchange="state.start=this.value;save();render()">';
+  html+='<label>Units note</label><div class="small">Weights shown in lb, rounded to 5. Hevy volume converted from kg.</div></div>';
+  html+='<div class="card"><h2>1RM Maxes</h2><div class="small" style="margin-bottom:10px">Enter after Base Week 5 testing. Percentages auto-calculate on every lift session. Forced progression: +2.5-5 lb upper / +5-10 lb lower between blocks.</div><div class="maxgrid">';
+  for(const [k,name] of MAXKEYS){
+    html+='<div class="mx"><label>'+name+'</label><input type="number" inputmode="decimal" placeholder="lb" value="'+(state.maxes[k]||"")+'" onchange="setMax(\''+k+'\',this.value)"></div>';
+  }
+  html+="</div></div>";
+  html+='<div class="card"><h2>Hevy Sync</h2><label>API key (hevy.com → Settings → API)</label><input type="password" value="'+esc(state.key)+'" onchange="state.key=this.value;save()" placeholder="paste key — stays on this device">';
+  html+='<div class="btnrow"><button class="b-sec" style="flex:1" onclick="hevySync(this)">Sync Hevy</button></div>';
+  html+='<div class="small" style="margin-top:8px">'+(state.hevy.last?"Last synced "+new Date(state.hevy.last).toLocaleString():"Never synced")+". Workouts are matched to plan days by date and shown as pink dots.</div></div>";
+  html+='<div class="card"><h2>Backup</h2><div class="btnrow"><button class="b-sec" style="flex:1" onclick="exportJson()">Export JSON</button><button class="b-sec" style="flex:1" onclick="document.getElementById(\'imp\').click()">Import</button></div><input type="file" id="imp" accept=".json" style="display:none" onchange="importJson(this)">';
+  html+='<div class="btnrow"><button class="b-danger" style="flex:1" onclick="if(confirm(\'Erase ALL data?\')){localStorage.removeItem(LSKEY);location.reload()}">Reset everything</button></div></div>';
+  html+='<div class="small" style="margin:4px 6px">Add to Home Screen: open in Safari → Share → “Add to Home Screen” for the full-screen app experience. Data lives in this browser — export a backup occasionally.</div>';
+  app.innerHTML=html;
+}
+/* ================= DETAIL SHEET ================= */
+function openDetail(w,d){
+  const wk=PLAN[w-1],s=wk.days[d-1];
+  const st=statusOf(w,d);
+  const dt=dateOfDay(w,d);
+  const hv=hevyFor(w,d);
+  let html='<div class="grab"></div>'+pill(s.tag)+'<h3>'+esc(s.title)+'</h3><div class="when">Week '+w+" ("+wk.phase+(wk.label?" · "+wk.label:" wk "+wk.phaseWeek)+") · Day "+d+" · "+fmtD(dt)+"</div>";
+  if(s.sub)html+='<div class="next-sub">'+esc(s.sub)+"</div>";
+  html+=linesHtml(s);
+  if(s.notes&&s.notes.length)html+='<div class="note">'+s.notes.map(esc).join("<br>")+"</div>";
+  if(wk.notes&&wk.notes.length&&d===1)html+='<div class="banner" style="margin-top:10px">'+esc(wk.notes[0])+"</div>";
+  if(s.def&&DEFS[s.def])html+='<div class="def">'+esc(DEFS[s.def])+"</div>";
+  if(s.lines.some(l=>l.def))s.lines.filter(l=>l.def).forEach(l=>{html+='<div class="def">'+esc(DEFS[l.def])+"</div>";});
+  if(hv.length){
+    html+='<h2 style="font-size:.8rem;text-transform:uppercase;color:var(--dim);margin-top:14px">Hevy — this day</h2>';
+    html+=hv.map(x=>'<div class="hevy-item"><div>'+esc(x.title)+'</div><div style="text-align:right">'+(x.mins?x.mins+" min":"")+'<div class="t">'+x.ex+" exercises · "+x.vol.toLocaleString()+" lb</div></div></div>").join("");
+  }
+  if(s.tag!=="rest"){
+    html+='<div class="btnrow">'+
+      '<button class="b-pri" onclick="setStatus('+w+","+d+",'done');closeModal()\">"+(st==="done"?"✓ Done":"Mark Done")+"</button>"+
+      '<button class="b-sec" onclick="setStatus('+w+","+d+",'skip');closeModal()\">"+(st==="skip"?"Skipped ✓":"Skip")+"</button>"+
+      (st?'<button class="b-ghost" onclick="setStatus('+w+","+d+",null);closeModal()\">Clear</button>":"")+
+      "</div>";
+  }
+  html+='<div class="btnrow"><button class="b-ghost" style="flex:1" onclick="toggleDeload('+w+');closeModal()">'+(state.deloads.includes(w)?"Remove deload after Week "+w:"Insert deload week after Week "+w)+"</button></div>";
+  document.getElementById("sheet").innerHTML=html;
+  document.getElementById("modal").classList.add("open");
+}
+function closeModal(){document.getElementById("modal").classList.remove("open");}
+document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal();});
+/* ================= ACTIONS ================= */
+function setStatus(w,d,v){
+  const k=w+"."+d;
+  if(v===null)delete state.status[k];
+  else if(state.status[k]===v)delete state.status[k];
+  else state.status[k]=v;
+  save();render();
+}
+function setMax(k,v){
+  const n=parseFloat(v);
+  if(n>0)state.maxes[k]=n;else delete state.maxes[k];
+  save();
+}
+function toggleDeload(w){
+  const i=state.deloads.indexOf(w);
+  if(i>=0)state.deloads.splice(i,1);else{state.deloads.push(w);state.deloads.sort((a,b)=>a-b);}
+  save();render();
+}
+function exportJson(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="tb-activation-backup-"+iso(new Date())+".json";
+  a.click();
+}
+function importJson(inp){
+  const f=inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{state=Object.assign(defaultState(),JSON.parse(r.result));save();render();alert("Imported.");}catch(e){alert("Invalid file.");}};
+  r.readAsText(f);
+}
+/* ================= NAV ================= */
+function render(){
+  document.querySelectorAll("#tabbar button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
+  if(tab==="today")renderToday();
+  else if(tab==="plan")renderPlan();
+  else if(tab==="stats")renderStats();
+  else renderSettings();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll("#tabbar button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render();});
+load();render();
+</script>
+</body>
+</html>
