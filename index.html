@@ -79,9 +79,10 @@ textarea{font:inherit;background:var(--card2);border:1px solid var(--line);color
 #tabbar button{background:none;color:var(--dim);font-size:.68rem;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 16px;font-weight:600}
 #tabbar button.on{color:var(--accent)}
 #tabbar .ic{font-size:1.25rem;line-height:1}
-#modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:none;align-items:flex-end}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:none;align-items:flex-end;cursor:pointer}
 #modal.open{display:flex}
-#modal .sheet{background:var(--card);border-radius:18px 18px 0 0;width:100%;max-width:560px;margin:0 auto;max-height:86vh;overflow-y:auto;padding:18px 18px calc(24px + var(--safe-bot))}
+#modal .sheet{background:var(--card);border-radius:18px 18px 0 0;width:100%;max-width:560px;margin:0 auto;max-height:86vh;overflow-y:auto;padding:18px 18px calc(24px + var(--safe-bot));cursor:auto;position:relative}
+.closex{position:absolute;top:12px;right:14px;width:34px;height:34px;border-radius:50%;background:var(--card2);border:1px solid var(--line);color:var(--txt);font-size:1.05rem;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;z-index:5}
 .sheet .grab{width:36px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
 .sheet h3{font-size:1.2rem;margin:6px 0 2px}
 .sheet .when{color:var(--dim);font-size:.85rem;margin-bottom:12px}
@@ -646,7 +647,7 @@ function openDetail(w,d){
   const st=statusOf(w,d);
   const dt=dateOfDay(w,d);
   const hv=hevyFor(w,d);
-  let html='<div class="grab"></div>'+pill(s.tag)+'<h3>'+esc(s.title)+'</h3><div class="when">Week '+w+" ("+wk.phase+(wk.label?" · "+wk.label:" wk "+wk.phaseWeek)+") · Day "+d+" · "+fmtD(dt)+"</div>";
+  let html='<div class="grab"></div><button class="closex" onclick="closeModal()">✕</button>'+pill(s.tag)+'<h3>'+esc(s.title)+'</h3><div class="when">Week '+w+" ("+wk.phase+(wk.label?" · "+wk.label:" wk "+wk.phaseWeek)+") · Day "+d+" · "+fmtD(dt)+"</div>";
   if(s.sub)html+='<div class="next-sub">'+esc(s.sub)+"</div>";
   html+=linesHtml(s);
   if(s.notes&&s.notes.length)html+='<div class="note">'+s.notes.map(esc).join("<br>")+"</div>";
@@ -690,6 +691,7 @@ function openDetail(w,d){
 }
 function closeModal(){document.getElementById("modal").classList.remove("open");}
 document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal();});
+document.getElementById("modal").addEventListener("touchend",e=>{if(e.target.id==="modal"){e.preventDefault();closeModal();}});
 /* ================= ACTIONS ================= */
 function setStatus(w,d,v){
   const k=w+"."+d;
